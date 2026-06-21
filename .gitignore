@@ -1,1 +1,40 @@
+```
+# Dependency directories
+vendor/
+node_modules/
 
+# Laravel specific
+bootstrap/cache/
+storage/framework/cache/data/
+storage/framework/sessions/
+storage/framework/views/
+storage/logs/
+database/seeds/
+database/factories/
+
+# Environment
+.env
+.env.local
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Compiled files
+*.php~
+*.blade.php~
+
+# Testing
+.phpunit.result.cache
+```
