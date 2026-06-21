@@ -291,4 +291,225 @@ class User extends Authenticatable
     {
         return $this->hasMany(CoursePackage::class, 'created_by');
     }
+
+    // ==================== KONSTANTA ROLE ====================
+    
+    const ROLE_STUDENT = 'student';
+    const ROLE_INSTRUCTOR = 'instructor';
+    const ROLE_ADMIN = 'admin';
+    const ROLE_SUPER_ADMIN = 'super_admin';
+    const ROLE_PARENT = 'parent';
+    const ROLE_GUEST = 'guest';
+
+    // ==================== KONSTANTA STATUS ====================
+    
+    const STATUS_ACTIVE = 'active';
+    const STATUS_INACTIVE = 'inactive';
+    const STATUS_SUSPENDED = 'suspended';
+    const STATUS_PENDING = 'pending';
+
+    // ==================== METHOD AUTENTIKASI ====================
+
+    /**
+     * Cek apakah user terkunci
+     */
+    public function isLocked(): bool
+    {
+        if ($this->locked_until === null) {
+            return false;
+        }
+
+        return $this->locked_until->isFuture();
+    }
+
+    /**
+     * Increment login attempts dan lock jika mencapai max (5 attempts = 30 menit lock)
+     */
+    public function recordLoginAttempt(bool $success): void
+    {
+        if ($success) {
+            $this->login_attempts = 0;
+            $this->locked_until = null;
+        } else {
+            $this->login_attempts = ($this->login_attempts ?? 0) + 1;
+
+            if ($this->login_attempts >= 5) {
+                $this->locked_until = now()->addMinutes(30);
+            }
+        }
+
+        $this->save();
+    }
+
+    /**
+     * Reset login attempts setelah login sukses
+     */
+    public function resetLoginAttempts(): void
+    {
+        $this->login_attempts = 0;
+        $this->locked_until = null;
+        $this->save();
+    }
+
+    /**
+     * Cek apakah user bisa login
+     */
+    public function canLogin(): bool
+    {
+        if ($this->status !== self::STATUS_ACTIVE) {
+            return false;
+        }
+
+        if ($this->isLocked()) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Invalidate semua session lain (untuk logout other devices)
+     */
+    public function logoutOtherDevices(string $password): void
+    {
+        $this->forceFill([
+            'remember_token' => \Str::random(60),
+        ])->save();
+    }
+
+    // ==================== ROLE CHECKING ====================
+
+    /**
+     * Cek apakah user adalah student
+     */
+    public function isStudent(): bool
+    {
+        return $this->role === self::ROLE_STUDENT;
+    }
+
+    /**
+     * Cek apakah user adalah instructor
+     */
+    public function isInstructor(): bool
+    {
+        return $this->role === self::ROLE_INSTRUCTOR;
+    }
+
+    /**
+     * Cek apakah user adalah admin atau super_admin
+     */
+    public function isAdmin(): bool
+    {
+        return in_array($this->role, [self::ROLE_ADMIN, self::ROLE_SUPER_ADMIN]);
+    }
+
+    /**
+     * Cek apakah user adalah super admin
+     */
+    public function isSuperAdmin(): bool
+    {
+        return $this->role === self::ROLE_SUPER_ADMIN;
+    }
+
+    /**
+     * Cek apakah user adalah parent
+     */
+    public function isParent(): bool
+    {
+        return $this->role === self::ROLE_PARENT;
+    }
+
+    /**
+     * Cek apakah user adalah guest
+     */
+    public function isGuest(): bool
+    {
+        return $this->role === self::ROLE_GUEST;
+    }
+
+    /**
+     * Cek apakah user memiliki role tertentu
+     */
+    public function hasRole(string $role): bool
+    {
+        return $this->role === $role;
+    }
+
+    /**
+     * Cek apakah user memiliki salah satu dari beberapa role
+     */
+    public function hasAnyRole(array $roles): bool
+    {
+        return in_array($this->role, $roles);
+    }
+
+    /**
+     * Cek apakah user memiliki semua role yang diberikan
+     */
+    public function hasAllRoles(array $roles): bool
+    {
+        foreach ($roles as $role) {
+            if (!$this->hasRole($role)) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    // ==================== ACCESSORS TAMBAHAN ====================
+
+    /**
+     * Get display name (full name atau email prefix)
+     */
+    public function getDisplayNameAttribute(): string
+    {
+        if ($this->full_name) {
+            return $this->full_name;
+        }
+
+        return explode('@', $this->email)[0];
+    }
+
+    /**
+     * Get avatar URL dari profile
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->profile?->avatar_url;
+    }
+
+    // ==================== SCOPES TAMBAHAN ====================
+
+    /**
+     * Scope untuk user yang tidak terkunci
+     */
+    public function scopeUnlocked($query)
+    {
+        return $query->whereNull('locked_until')
+                    ->orWhere('locked_until', '<', now());
+    }
+
+    /**
+     * Scope untuk student
+     */
+    public function scopeStudents($query)
+    {
+        return $query->where('role', self::ROLE_STUDENT);
+    }
+
+    /**
+     * Scope untuk instructor
+     */
+    public function scopeInstructors($query)
+    {
+        return $query->where('role', self::ROLE_INSTRUCTOR);
+    }
+
+    /**
+     * Scope untuk admins (admin + super_admin)
+     */
+    public function scopeAdmins($query)
+    {
+        return $query->whereIn('role', [self::ROLE_ADMIN, self::ROLE_SUPER_ADMIN]);
+    }
 }
