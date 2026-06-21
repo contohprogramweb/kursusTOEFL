@@ -25,20 +25,26 @@ class Module extends Model
     protected function casts(): array
     {
         return [
+            'difficulty' => 'integer',
             'order_index' => 'integer',
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
         ];
     }
 
-    public function scopeActive($query)
+    public function scopePublished($query)
     {
-        return $query->where('status', 'active');
+        return $query->where('status', 'published');
     }
 
     public function scopeBySection($query, $section)
     {
         return $query->where('section', $section);
+    }
+
+    public function scopeByDifficulty($query, $difficulty)
+    {
+        return $query->where('difficulty', $difficulty);
     }
 
     public function contents(): HasMany

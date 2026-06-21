@@ -43,3 +43,37 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// Admin Module Management Routes
+Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
+    // Modules CRUD
+    Route::get('/modules', [App\Http\Controllers\Admin\ModuleController::class, 'index'])->name('modules.index');
+    Route::get('/modules/create', [App\Http\Controllers\Admin\ModuleController::class, 'create'])->name('modules.create');
+    Route::post('/modules', [App\Http\Controllers\Admin\ModuleController::class, 'store'])->name('modules.store');
+    Route::get('/modules/{module}', [App\Http\Controllers\Admin\ModuleController::class, 'show'])->name('modules.show');
+    Route::get('/modules/{module}/edit', [App\Http\Controllers\Admin\ModuleController::class, 'edit'])->name('modules.edit');
+    Route::put('/modules/{module}', [App\Http\Controllers\Admin\ModuleController::class, 'update'])->name('modules.update');
+    Route::delete('/modules/{module}', [App\Http\Controllers\Admin\ModuleController::class, 'destroy'])->name('modules.destroy');
+
+    // Module Contents
+    Route::post('/modules/{module}/contents', [App\Http\Controllers\Admin\ModuleContentController::class, 'store'])->name('modules.contents.store');
+    Route::put('/contents/{content}', [App\Http\Controllers\Admin\ModuleContentController::class, 'update'])->name('contents.update');
+    Route::delete('/contents/{content}', [App\Http\Controllers\Admin\ModuleContentController::class, 'destroy'])->name('contents.destroy');
+    Route::post('/modules/{module}/reorder', [App\Http\Controllers\Admin\ModuleContentController::class, 'reorder'])->name('modules.contents.reorder');
+});
+
+// Learning Routes (for students)
+Route::middleware(['auth'])->prefix('learning')->name('learning.')->group(function () {
+    // Learning Dashboard
+    Route::get('/dashboard', [App\Http\Controllers\LearningController::class, 'dashboard'])->name('dashboard');
+    
+    // Module listing and viewing
+    Route::get('/modules', [App\Http\Controllers\LearningController::class, 'index'])->name('modules.index');
+    Route::get('/modules/{module}', [App\Http\Controllers\LearningController::class, 'show'])->name('modules.show');
+    Route::get('/modules/{module}/start', [App\Http\Controllers\LearningController::class, 'start'])->name('modules.start');
+    Route::post('/modules/{module}/clear-resume', [App\Http\Controllers\LearningController::class, 'clearResumePosition'])->name('modules.clear-resume');
+    
+    // Content viewing and progress
+    Route::get('/modules/{module}/contents/{content}', [App\Http\Controllers\LearningController::class, 'showContent'])->name('content.show');
+    Route::post('/modules/{module}/contents/{content}/progress', [App\Http\Controllers\LearningController::class, 'updateProgress'])->name('content.progress');
+});

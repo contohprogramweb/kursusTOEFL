@@ -31,6 +31,11 @@ class ModuleContent extends Model
         ];
     }
 
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('order_index');
+    }
+
     public function module(): BelongsTo
     {
         return $this->belongsTo(Module::class);

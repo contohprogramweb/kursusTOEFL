@@ -43,6 +43,16 @@ class LearningProgress extends Model
             ->where('progress_percentage', '>', 0);
     }
 
+    public function scopeNotStarted($query)
+    {
+        return $query->where('progress_percentage', 0);
+    }
+
+    public function isCompleted(): bool
+    {
+        return $this->progress_percentage >= 100;
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

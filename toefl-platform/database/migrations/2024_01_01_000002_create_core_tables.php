@@ -81,8 +81,8 @@ return new class extends Migration
             $table->id();
             $table->string('title');
             $table->text('description')->nullable();
-            $table->enum('section', ['listening', 'structure', 'reading']);
-            $table->enum('difficulty', ['beginner', 'intermediate', 'advanced'])->default('intermediate');
+            $table->enum('section', ['reading', 'listening', 'speaking', 'writing']);
+            $table->tinyInteger('difficulty')->unsigned()->default(3); // 1-5 scale
             $table->integer('order_index')->default(0);
             $table->enum('status', ['draft', 'published', 'archived'])->default('draft');
             $table->foreignId('created_by')->constrained('users')->onDelete('set null');
@@ -96,7 +96,7 @@ return new class extends Migration
         Schema::create('module_contents', function (Blueprint $table) {
             $table->id();
             $table->foreignId('module_id')->constrained()->onDelete('cascade');
-            $table->enum('content_type', ['video', 'text', 'audio', 'interactive', 'quiz']);
+            $table->enum('content_type', ['text', 'video', 'audio', 'infographic', 'quiz']);
             $table->string('title');
             $table->json('content_data');
             $table->integer('order_index')->default(0);
@@ -110,7 +110,7 @@ return new class extends Migration
         Schema::create('micro_skills', function (Blueprint $table) {
             $table->id();
             $table->string('name');
-            $table->enum('section', ['listening', 'structure', 'reading']);
+            $table->enum('section', ['reading', 'listening', 'speaking', 'writing']);
             $table->text('description')->nullable();
             $table->timestamps();
             
@@ -120,7 +120,7 @@ return new class extends Migration
 
         Schema::create('questions', function (Blueprint $table) {
             $table->id();
-            $table->enum('section', ['listening', 'structure', 'reading']);
+            $table->enum('section', ['reading', 'listening', 'speaking', 'writing']);
             $table->enum('question_type', ['multiple_choice', 'completion', 'reordering', 'essay', 'speaking']);
             $table->text('question_text');
             $table->text('passage_text')->nullable();
@@ -183,7 +183,7 @@ return new class extends Migration
         Schema::create('simulation_template_sections', function (Blueprint $table) {
             $table->id();
             $table->foreignId('template_id')->constrained()->onDelete('cascade');
-            $table->enum('section', ['listening', 'structure', 'reading']);
+            $table->enum('section', ['reading', 'listening', 'speaking', 'writing']);
             $table->integer('order_index')->default(0);
             $table->integer('duration_minutes')->default(0);
             $table->integer('question_count')->default(0);
@@ -211,7 +211,7 @@ return new class extends Migration
         Schema::create('section_results', function (Blueprint $table) {
             $table->id();
             $table->foreignId('result_id')->constrained('simulation_results')->onDelete('cascade');
-            $table->enum('section', ['listening', 'structure', 'reading']);
+            $table->enum('section', ['reading', 'listening', 'speaking', 'writing']);
             $table->decimal('score', 5, 2)->nullable();
             $table->integer('raw_score')->nullable();
             $table->integer('duration_seconds')->default(0);
@@ -286,7 +286,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('exercise_type');
-            $table->enum('section', ['listening', 'structure', 'reading']);
+            $table->enum('section', ['reading', 'listening', 'speaking', 'writing']);
             $table->enum('mode', ['practice', 'timed', 'adaptive']);
             $table->decimal('score', 5, 2)->nullable();
             $table->integer('total_questions')->default(0);
@@ -428,7 +428,7 @@ return new class extends Migration
             $table->foreignId('assignment_id')->constrained()->onDelete('cascade');
             $table->foreignId('student_id')->constrained('users')->onDelete('cascade');
             $table->foreignId('instructor_id')->constrained('users')->onDelete('set null');
-            $table->enum('section', ['listening', 'structure', 'reading']);
+            $table->enum('section', ['reading', 'listening', 'speaking', 'writing']);
             $table->string('dimension')->nullable();
             $table->decimal('score', 5, 2)->nullable();
             $table->text('text_feedback')->nullable();
