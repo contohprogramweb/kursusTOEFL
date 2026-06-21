@@ -45,17 +45,17 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->boolean('dark_mode')->default(false);
-            $table->integer('font_size')->default(16);
+            $table->enum('font_size', ['small', 'medium', 'large', 'extra_large'])->default('medium');
             $table->boolean('high_contrast')->default(false);
             $table->boolean('animations')->default(true);
             $table->boolean('screen_reader_opt')->default(false);
-            $table->string('language')->default('en');
+            $table->enum('language', ['id', 'en'])->default('en');
             $table->boolean('dnd_enabled')->default(false);
             $table->time('dnd_start')->nullable();
             $table->time('dnd_end')->nullable();
-            $table->json('dnd_days')->nullable(); // ['monday', 'tuesday', ...]
+            $table->json('dnd_days')->nullable(); // [0, 1, 2, ...] where 0=Sunday, 6=Saturday
             $table->timestamps();
-            
+            $table->json('notification_preferences')->nullable(); // {'category': {'in_app': true, 'email': false, 'push': true}}
             $table->unique('user_id');
         });
 
