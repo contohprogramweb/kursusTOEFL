@@ -4,14 +4,16 @@
 __pycache__/
 *.o
 *.obj
-dist/
-build/
-target/
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
 
 # Dependencies
-node_modules/
 vendor/
-composer.lock
+node_modules/
 .env
 .env.local
 .env.*
@@ -20,55 +22,23 @@ composer.lock
 *.log
 *.tmp
 *.swp
+*.swo
 
 # Editors
 .vscode/
 .idea/
 
-# OS generated files
+# System files
 .DS_Store
 Thumbs.db
 
-# PHP specific
-*.php~
-.php_cs.cache
-
-# Laravel/PHP frameworks
-storage/
-bootstrap/cache/
-public/storage
-
-# Coverage reports
+# Coverage
 coverage/
 htmlcov/
 .coverage
 
-# IDE and editor files
-*.swp
-*.swo
-*.tmp
-
-# Compressed files
-*.zip
-*.gz
-*.tar
-*.tgz
-*.bz2
-*.xz
-*.7z
-*.rar
-*.zst
-*.lz4
-*.lzh
-*.cab
-*.arj
-*.rpm
-*.deb
-*.Z
-*.lz
-*.lzo
-*.tar.gz
-*.tar.bz2
-*.tar.xz
-*.tar.zst
+# Build directories
+dist/
+build/
+target/
 ```
