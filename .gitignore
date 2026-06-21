@@ -1,16 +1,12 @@
 ```
-# Dependency directories
-vendor/
-node_modules/
+# Laravel-specific ignores
+database/migrations/*.php
+*.sqlite
+*.db
 
-# Laravel specific
-bootstrap/cache/
-storage/framework/cache/data/
-storage/framework/sessions/
-storage/framework/views/
-storage/logs/
-database/seeds/
-database/factories/
+# Dependencies
+vendor/
+composer.lock
 
 # Environment
 .env
@@ -18,7 +14,22 @@ database/factories/
 .env.*
 !.env.example
 
-# IDE
+# Logs
+*.log
+storage/logs/
+
+# Cache
+bootstrap/cache/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+
+# Assets
+public/css/
+public/js/
+public/build/
+
+# Editor
 .vscode/
 .idea/
 *.swp
@@ -28,13 +39,6 @@ database/factories/
 .DS_Store
 Thumbs.db
 
-# Logs
-*.log
-
-# Compiled files
-*.php~
-*.blade.php~
-
-# Testing
+# Tests
 .phpunit.result.cache
 ```
