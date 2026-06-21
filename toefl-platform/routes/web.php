@@ -60,6 +60,18 @@ Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () 
     Route::put('/contents/{content}', [App\Http\Controllers\Admin\ModuleContentController::class, 'update'])->name('contents.update');
     Route::delete('/contents/{content}', [App\Http\Controllers\Admin\ModuleContentController::class, 'destroy'])->name('contents.destroy');
     Route::post('/modules/{module}/reorder', [App\Http\Controllers\Admin\ModuleContentController::class, 'reorder'])->name('modules.contents.reorder');
+
+    // Questions CRUD (Question Bank)
+    Route::get('/questions', [App\Http\Controllers\Admin\QuestionController::class, 'index'])->name('questions.index');
+    Route::get('/questions/create', [App\Http\Controllers\Admin\QuestionController::class, 'create'])->name('questions.create');
+    Route::post('/questions', [App\Http\Controllers\Admin\QuestionController::class, 'store'])->name('questions.store');
+    Route::get('/questions/{question}', [App\Http\Controllers\Admin\QuestionController::class, 'show'])->name('questions.show');
+    Route::get('/questions/{question}/edit', [App\Http\Controllers\Admin\QuestionController::class, 'edit'])->name('questions.edit');
+    Route::put('/questions/{question}', [App\Http\Controllers\Admin\QuestionController::class, 'update'])->name('questions.update');
+    Route::delete('/questions/{question}', [App\Http\Controllers\Admin\QuestionController::class, 'destroy'])->name('questions.destroy');
+    
+    // Questions API
+    Route::get('/questions/api', [App\Http\Controllers\Admin\QuestionController::class, 'apiIndex'])->name('questions.api');
 });
 
 // Learning Routes (for students)

@@ -35,6 +35,7 @@ class Question extends Model
     protected function casts(): array
     {
         return [
+            'difficulty' => 'integer',
             'preparation_time' => 'integer',
             'response_time' => 'integer',
             'word_limit_min' => 'integer',
@@ -43,6 +44,33 @@ class Question extends Model
             'updated_at' => 'datetime',
         ];
     }
+
+    public const QUESTION_TYPES = [
+        'multiple_choice' => 'Multiple Choice',
+        'fill_blank' => 'Fill in the Blank',
+        'ordering' => 'Ordering',
+        'speaking_task' => 'Speaking Task',
+        'writing_task' => 'Writing Task',
+    ];
+
+    public const SECTIONS = [
+        'reading' => 'Reading',
+        'listening' => 'Listening',
+        'speaking' => 'Speaking',
+        'writing' => 'Writing',
+    ];
+
+    public const SOURCES = [
+        'official_ets' => 'Official ETS',
+        'internal' => 'Internal',
+        'partner' => 'Partner',
+    ];
+
+    public const STATUSES = [
+        'draft' => 'Draft',
+        'published' => 'Published',
+        'archived' => 'Archived',
+    ];
 
     public function scopeActive($query)
     {
@@ -59,9 +87,51 @@ class Question extends Model
         return $query->where('difficulty', $difficulty);
     }
 
+    public function scopeBySource($query, $source)
+    {
+        return $query->where('source', $source);
+    }
+
+    public function scopeByStatus($query, $status)
+    {
+        return $query->where('status', $status);
+    }
+
+    public function scopeSearch($query, $searchTerm)
+    {
+        if (empty($searchTerm)) {
+            return $query;
+        }
+
+        // Use MySQL full-text search if available
+        try {
+            return $query->whereRaw(
+                "MATCH(question_text, passage_text) AGAINST(? IN BOOLEAN MODE)",
+                [$searchTerm]
+            );
+        } catch (\Exception $e) {
+            // Fallback to LIKE search
+            return $query->where(function ($q) use ($searchTerm) {
+                $q->where('question_text', 'LIKE', "%{$searchTerm}%")
+                  ->orWhere('passage_text', 'LIKE', "%{$searchTerm}%");
+            });
+        }
+    }
+
+    public function scopeWithSkills($query, $skillIds)
+    {
+        if (empty($skillIds)) {
+            return $query;
+        }
+
+        return $query->whereHas('skills', function ($q) use ($skillIds) {
+            $q->whereIn('micro_skills.id', $skillIds);
+        });
+    }
+
     public function options(): HasMany
     {
-        return $this->hasMany(QuestionOption::class);
+        return $this->hasMany(QuestionOption::class)->orderBy('order_index');
     }
 
     public function skills(): BelongsToMany
@@ -74,5 +144,34 @@ class Question extends Model
     public function creator(): BelongsTo
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function getQuestionTypeLabelAttribute(): string
+    {
+        return self::QUESTION_TYPES[$this->question_type] ?? $this->question_type;
+    }
+
+    public function getSectionLabelAttribute(): string
+    {
+        return self::SECTIONS[$this->section] ?? $this->section;
+    }
+
+    public function getSourceLabelAttribute(): string
+    {
+        return self::SOURCES[$this->source] ?? $this->source;
+    }
+
+    public function getStatusLabelAttribute(): string
+    {
+        return self::STATUSES[$this->status] ?? $this->status;
+    }
+
+    /**
+     * Validate that question has between 1 and 3 micro-skills
+     */
+    public function validateSkillCount(): bool
+    {
+        $skillCount = $this->skills()->count();
+        return $skillCount >= 1 && $skillCount <= 3;
     }
 }
