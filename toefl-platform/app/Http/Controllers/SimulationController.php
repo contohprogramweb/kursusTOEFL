@@ -7,6 +7,7 @@ use App\Models\SimulationResult;
 use App\Models\SectionResult;
 use App\Models\Question;
 use App\Models\QuestionResponse;
+use App\Services\AutoGradingService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
@@ -156,7 +157,7 @@ class SimulationController extends Controller
     /**
      * Submit the simulation for grading.
      */
-    public function submit(SimulationResult $simulation): JsonResponse
+    public function submit(SimulationResult $simulation, AutoGradingService $gradingService): JsonResponse
     {
         if ($simulation->user_id !== auth()->id()) {
             return response()->json(['error' => 'Unauthorized'], 403);
@@ -166,7 +167,7 @@ class SimulationController extends Controller
             return response()->json(['error' => 'Simulation is not in progress'], 400);
         }
 
-        DB::transaction(function () use ($simulation) {
+        DB::transaction(function () use ($simulation, $gradingService) {
             // Transition to submitted status
             $simulation->transitionTo(SimulationTemplate::STATUS_SUBMITTED);
             
@@ -174,11 +175,14 @@ class SimulationController extends Controller
             $simulation->sectionResults()->update([
                 'status' => 'graded'
             ]);
+            
+            // Perform auto-grading for Reading and Listening sections (SLA: <= 1 detik)
+            $gradingService->gradeSimulation($simulation);
         });
 
         return response()->json([
             'success' => true,
-            'message' => 'Simulation submitted for grading',
+            'message' => 'Simulation submitted and graded successfully',
         ]);
     }
 
@@ -245,6 +249,137 @@ class SimulationController extends Controller
         return response()->json([
             'success' => true,
             'section_times' => $simulation->section_times,
+        ]);
+    }
+
+    /**
+     * Save answer for a question (auto-save every 30 detik).
+     */
+    public function saveAnswer(Request $request, SimulationResult $simulation): JsonResponse
+    {
+        if ($simulation->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'question_id' => 'required|exists:questions,id',
+            'selected_option_id' => 'nullable|exists:question_options,id',
+            'text_response' => 'nullable|string',
+            'audio_url' => 'nullable|string',
+            'time_spent_seconds' => 'nullable|integer|min:0',
+            'flagged' => 'nullable|boolean',
+        ]);
+
+        $sectionMap = [
+            SimulationTemplate::STATUS_READING => 'reading',
+            SimulationTemplate::STATUS_LISTENING => 'listening',
+            SimulationTemplate::STATUS_SPEAKING => 'speaking',
+            SimulationTemplate::STATUS_WRITING => 'writing',
+        ];
+
+        $currentSection = $sectionMap[$simulation->status] ?? null;
+
+        if (!$currentSection) {
+            return response()->json(['error' => 'No active section'], 400);
+        }
+
+        // Get the section result for current section
+        $sectionResult = $simulation->sectionResults()
+            ->where('section', $currentSection)
+            ->first();
+
+        if (!$sectionResult) {
+            return response()->json(['error' => 'Section result not found'], 400);
+        }
+
+        // Update or create question response
+        $response = QuestionResponse::updateOrCreate(
+            [
+                'section_result_id' => $sectionResult->id,
+                'question_id' => $validated['question_id'],
+            ],
+            [
+                'selected_option_id' => $validated['selected_option_id'] ?? null,
+                'text_response' => $validated['text_response'] ?? null,
+                'audio_url' => $validated['audio_url'] ?? null,
+                'time_spent_seconds' => $validated['time_spent_seconds'] ?? 0,
+                'flagged' => $validated['flagged'] ?? false,
+            ]
+        );
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Answer saved successfully',
+            'response_id' => $response->id,
+        ]);
+    }
+
+    /**
+     * Bulk save answers (for auto-save).
+     */
+    public function bulkSaveAnswers(Request $request, SimulationResult $simulation): JsonResponse
+    {
+        if ($simulation->user_id !== auth()->id()) {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $validated = $request->validate([
+            'answers' => 'required|array',
+            'answers.*.question_id' => 'required|exists:questions,id',
+            'answers.*.selected_option_id' => 'nullable|exists:question_options,id',
+            'answers.*.text_response' => 'nullable|string',
+            'answers.*.audio_url' => 'nullable|string',
+            'answers.*.time_spent_seconds' => 'nullable|integer|min:0',
+            'answers.*.flagged' => 'nullable|boolean',
+        ]);
+
+        $sectionMap = [
+            SimulationTemplate::STATUS_READING => 'reading',
+            SimulationTemplate::STATUS_LISTENING => 'listening',
+            SimulationTemplate::STATUS_SPEAKING => 'speaking',
+            SimulationTemplate::STATUS_WRITING => 'writing',
+        ];
+
+        $currentSection = $sectionMap[$simulation->status] ?? null;
+
+        if (!$currentSection) {
+            return response()->json(['error' => 'No active section'], 400);
+        }
+
+        // Get the section result for current section
+        $sectionResult = $simulation->sectionResults()
+            ->where('section', $currentSection)
+            ->first();
+
+        if (!$sectionResult) {
+            return response()->json(['error' => 'Section result not found'], 400);
+        }
+
+        $savedCount = 0;
+
+        DB::transaction(function () use ($validated, $sectionResult, &$savedCount) {
+            foreach ($validated['answers'] as $answer) {
+                QuestionResponse::updateOrCreate(
+                    [
+                        'section_result_id' => $sectionResult->id,
+                        'question_id' => $answer['question_id'],
+                    ],
+                    [
+                        'selected_option_id' => $answer['selected_option_id'] ?? null,
+                        'text_response' => $answer['text_response'] ?? null,
+                        'audio_url' => $answer['audio_url'] ?? null,
+                        'time_spent_seconds' => $answer['time_spent_seconds'] ?? 0,
+                        'flagged' => $answer['flagged'] ?? false,
+                    ]
+                );
+                $savedCount++;
+            }
+        });
+
+        return response()->json([
+            'success' => true,
+            'message' => "Saved {$savedCount} answer(s) successfully",
+            'saved_count' => $savedCount,
         ]);
     }
 
