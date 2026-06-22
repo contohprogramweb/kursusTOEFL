@@ -55,4 +55,23 @@ return [
         'max_tokens' => env('CLAUDE_MAX_TOKENS', 4096),
     ],
 
+    // Firebase Cloud Messaging (FCM)
+    'firebase' => [
+        'project_id' => env('FIREBASE_PROJECT_ID'),
+        'server_key' => env('FIREBASE_SERVER_KEY'),
+    ],
+
+    // Twilio SMS API
+    'twilio' => [
+        'account_sid' => env('TWILIO_ACCOUNT_SID'),
+        'auth_token' => env('TWILIO_AUTH_TOKEN'),
+        'from_number' => env('TWILIO_FROM_NUMBER'),
+    ],
+
+    // WhatsApp API (Fonnte or similar)
+    'whatsapp' => [
+        'api_key' => env('WHATSAPP_API_KEY'),
+        'endpoint' => env('WHATSAPP_ENDPOINT', 'https://api.fonnte.com/send'),
+    ],
+
 ];
