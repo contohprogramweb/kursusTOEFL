@@ -1,59 +1,48 @@
 ```
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
-*.class
-*.exe
-*.dll
-*.so
-*.a
-*.out
+# Laravel-specific ignores
+vendor/
+bootstrap/cache/
+storage/logs/
+storage/framework/
 
 # Dependencies
-vendor/
 node_modules/
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
-# Logs and temp files
-*.log
-*.tmp
-*.swp
-*.swo
-*.bak
-*.cache
-
-# Environment
+# Environment specific settings
 .env
 .env.local
 .env.*
 !.env.example
 
-# Editors
+# Compiled and build artifacts
+*.php~
+*.js.map
+*.css.map
+public/build/
+
+# Logs
+*.log
+storage/logs/*
+
+# Editor/IDE
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# Build and distribution
-dist/
-build/
-target/
-coverage/
-htmlcov/
-.coverage
+*~
 
 # OS generated files
 .DS_Store
 Thumbs.db
-ehthumbs.db
-Icon?
-apidoc/
 
 # Testing
 .phpunit.result.cache
-.phpunit-watcher.yml
+coverage/
+.php_cs.cache
+
+# Legacy Laravel
+.svn
 ```
