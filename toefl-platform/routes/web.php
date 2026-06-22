@@ -149,6 +149,10 @@ Route::middleware(['auth'])->prefix('simulations')->name('simulations.')->group(
     Route::post('/{simulation}/resume-simulation', [App\Http\Controllers\SimulationController::class, 'resumeSimulation'])->name('resume-simulation');
     Route::post('/{simulation}/record-time', [App\Http\Controllers\SimulationController::class, 'recordTime'])->name('record-time');
     
+    // Auto-save answers (AJAX - every 30 detik)
+    Route::post('/{simulation}/save-answer', [App\Http\Controllers\SimulationController::class, 'saveAnswer'])->name('save-answer');
+    Route::post('/{simulation}/bulk-save-answers', [App\Http\Controllers\SimulationController::class, 'bulkSaveAnswers'])->name('bulk-save-answers');
+
     // Get simulation status (AJAX polling)
     Route::get('/{simulation}/status', [App\Http\Controllers\SimulationController::class, 'getStatus'])->name('status');
     
