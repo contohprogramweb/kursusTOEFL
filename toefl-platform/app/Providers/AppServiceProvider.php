@@ -7,6 +7,9 @@ use Illuminate\Support\Facades\Gate;
 use App\Models\ParentStudentLink;
 use App\Models\User;
 use App\Policies\ParentStudentLinkPolicy;
+use App\Events\ReplyCreated;
+use App\Listeners\SendReplyNotification;
+use Illuminate\Support\Facades\Event;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -25,5 +28,11 @@ class AppServiceProvider extends ServiceProvider
     {
         // Register policies
         Gate::policy(ParentStudentLink::class, ParentStudentLinkPolicy::class);
+
+        // Register Event Listeners for Forum Notifications
+        Event::listen(
+            ReplyCreated::class,
+            SendReplyNotification::class
+        );
     }
 }

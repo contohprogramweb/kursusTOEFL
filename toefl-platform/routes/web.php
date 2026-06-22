@@ -303,3 +303,33 @@ Route::middleware(['auth'])->group(function () {
         return redirect()->route('student.dashboard')->with('info', 'Fitur lencana akan segera tersedia.');
     })->name('badges.index');
 });
+
+// Forum Routes (FR-3.7.x, FR-3.8.x)
+Route::prefix('forum')->name('forum.')->group(function () {
+    // Public routes (read-only for guests)
+    Route::get('/', [App\Http\Controllers\Forum\ForumController::class, 'index'])->name('index');
+    Route::get('/threads/{thread}', [App\Http\Controllers\Forum\ForumController::class, 'show'])->name('threads.show');
+
+    // Authenticated routes
+    Route::middleware(['auth'])->group(function () {
+        // Thread creation
+        Route::get('/create', [App\Http\Controllers\Forum\ForumController::class, 'create'])->name('threads.create');
+        Route::post('/threads', [App\Http\Controllers\Forum\ForumController::class, 'store'])->name('threads.store');
+
+        // Reply to thread
+        Route::post('/threads/{thread}/reply', [App\Http\Controllers\Forum\ForumController::class, 'reply'])->name('threads.reply');
+
+        // Follow/unfollow thread
+        Route::post('/threads/{thread}/toggle-follow', [App\Http\Controllers\Forum\ForumController::class, 'toggleFollow'])->name('threads.toggle-follow');
+
+        // AJAX notification polling
+        Route::get('/notifications/count', [App\Http\Controllers\Forum\ForumController::class, 'getNotificationCount'])->name('notifications.count');
+    });
+
+    // Admin/Instructor routes (moderation)
+    Route::middleware(['auth'])->group(function () {
+        Route::post('/replies/{reply}/hide', [App\Http\Controllers\Forum\ForumController::class, 'hideReply'])->name('replies.hide');
+        Route::delete('/replies/{reply}', [App\Http\Controllers\Forum\ForumController::class, 'deleteReply'])->name('replies.delete');
+        Route::post('/{type}/{id}/flag', [App\Http\Controllers\Forum\ForumController::class, 'flagContent'])->name('flag-content');
+    });
+});
