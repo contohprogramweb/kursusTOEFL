@@ -1,7 +1,49 @@
 ```
-# PDF documents
-*.pdf
+# Dependencies
+vendor/
+node_modules/
 
-# Log files
+# Build and cache directories
+bootstrap/cache/
+storage/framework/cache/
+storage/framework/sessions/
+storage/framework/views/
+composer.lock
+
+# Environment specific files
+.env
+.env.local
+.env.*
+!.env.example
+
+# Logs
 *.log
+storage/logs/*
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Compiled and temporary files
+*.php~
+*.tmp
+*.bak
+
+# Database migration backups (if any)
+db_temp/
+resources_temp/
+
+# Coverage reports
+coverage/
+*.gcov
+*.lcov
+
+# Testing
+.phpunit.result.cache
 ```
