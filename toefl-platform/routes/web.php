@@ -44,6 +44,25 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
+// Exercise Routes (Interactive Practice)
+Route::middleware(['auth'])->prefix('exercises')->name('exercises.')->group(function () {
+    // Main exercise pages
+    Route::get('/', [App\Http\Controllers\ExerciseController::class, 'index'])->name('index');
+    Route::post('/create', [App\Http\Controllers\ExerciseController::class, 'create'])->name('create');
+    Route::get('/{session}', [App\Http\Controllers\ExerciseController::class, 'show'])->name('show');
+    Route::get('/history', [App\Http\Controllers\ExerciseController::class, 'history'])->name('history');
+    
+    // AJAX endpoints for exercise session
+    Route::get('/{session}/question', [App\Http\Controllers\ExerciseController::class, 'getCurrentQuestion'])->name('question.current');
+    Route::post('/{session}/answer', [App\Http\Controllers\ExerciseController::class, 'saveAnswer'])->name('answer.save');
+    Route::post('/{session}/next', [App\Http\Controllers\ExerciseController::class, 'nextQuestion'])->name('question.next');
+    Route::post('/{session}/previous', [App\Http\Controllers\ExerciseController::class, 'previousQuestion'])->name('question.previous');
+    Route::post('/{session}/submit', [App\Http\Controllers\ExerciseController::class, 'submit'])->name('submit');
+    
+    // Statistics API
+    Route::get('/api/statistics', [App\Http\Controllers\ExerciseController::class, 'statistics'])->name('api.statistics');
+});
+
 // Admin Module Management Routes
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {
     // Modules CRUD
