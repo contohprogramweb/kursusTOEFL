@@ -108,3 +108,51 @@ Route::middleware(['auth'])->prefix('learning')->name('learning.')->group(functi
     Route::get('/modules/{module}/contents/{content}', [App\Http\Controllers\LearningController::class, 'showContent'])->name('content.show');
     Route::post('/modules/{module}/contents/{content}/progress', [App\Http\Controllers\LearningController::class, 'updateProgress'])->name('content.progress');
 });
+
+// Admin Simulation Template Management Routes
+Route::middleware(['auth'])->prefix('admin/simulations')->name('admin.simulations.')->group(function () {
+    // CRUD for simulation templates
+    Route::get('/', [App\Http\Controllers\Admin\SimulationTemplateController::class, 'index'])->name('index');
+    Route::get('/create', [App\Http\Controllers\Admin\SimulationTemplateController::class, 'create'])->name('create');
+    Route::post('/', [App\Http\Controllers\Admin\SimulationTemplateController::class, 'store'])->name('store');
+    Route::get('/{template}', [App\Http\Controllers\Admin\SimulationTemplateController::class, 'show'])->name('show');
+    Route::get('/{template}/edit', [App\Http\Controllers\Admin\SimulationTemplateController::class, 'edit'])->name('edit');
+    Route::put('/{template}', [App\Http\Controllers\Admin\SimulationTemplateController::class, 'update'])->name('update');
+    Route::delete('/{template}', [App\Http\Controllers\Admin\SimulationTemplateController::class, 'destroy'])->name('destroy');
+
+    // B2B: Assign template to institution
+    Route::post('/{template}/assign', [App\Http\Controllers\Admin\SimulationTemplateController::class, 'assignToInstitution'])->name('assign');
+    Route::delete('/{template}/institutions/{institutionId}', [App\Http\Controllers\Admin\SimulationTemplateController::class, 'removeFromInstitution'])->name('remove-institution');
+
+    // API: Get available templates
+    Route::get('/api/available', [App\Http\Controllers\Admin\SimulationTemplateController::class, 'apiAvailableTemplates'])->name('api.available');
+});
+
+// User Simulation Routes
+Route::middleware(['auth'])->prefix('simulations')->name('simulations.')->group(function () {
+    // List available simulations
+    Route::get('/', [App\Http\Controllers\SimulationController::class, 'index'])->name('index');
+    
+    // Start a new simulation from template
+    Route::post('/templates/{template}/start', [App\Http\Controllers\SimulationController::class, 'start'])->name('start');
+    
+    // Resume an existing simulation
+    Route::get('/{simulation}/resume', [App\Http\Controllers\SimulationController::class, 'resume'])->name('resume');
+    
+    // Run simulation interface
+    Route::get('/{simulation}/run', [App\Http\Controllers\SimulationController::class, 'run'])->name('run');
+    
+    // Simulation state transitions (AJAX)
+    Route::post('/{simulation}/next-section', [App\Http\Controllers\SimulationController::class, 'nextSection'])->name('next-section');
+    Route::post('/{simulation}/submit', [App\Http\Controllers\SimulationController::class, 'submit'])->name('submit');
+    Route::post('/{simulation}/pause', [App\Http\Controllers\SimulationController::class, 'pause'])->name('pause');
+    Route::post('/{simulation}/resume-simulation', [App\Http\Controllers\SimulationController::class, 'resumeSimulation'])->name('resume-simulation');
+    Route::post('/{simulation}/record-time', [App\Http\Controllers\SimulationController::class, 'recordTime'])->name('record-time');
+    
+    // Get simulation status (AJAX polling)
+    Route::get('/{simulation}/status', [App\Http\Controllers\SimulationController::class, 'getStatus'])->name('status');
+    
+    // View results
+    Route::get('/{simulation}/results', [App\Http\Controllers\SimulationController::class, 'showResults'])->name('results.show');
+    Route::get('/{simulation}/results/{section}', [App\Http\Controllers\SimulationController::class, 'showSectionResults'])->name('results.section');
+});

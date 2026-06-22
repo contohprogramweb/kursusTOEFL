@@ -11,16 +11,19 @@ target/
 # Dependencies
 node_modules/
 vendor/
+composer.lock
 *.lock
-.env
-.env.local
-.env.*
 
 # Logs and temp files
 *.log
 *.tmp
 *.swp
 *.swo
+
+# Environment
+.env
+.env.local
+.env.*
 
 # Editors
 .vscode/
@@ -38,9 +41,13 @@ htmlcov/
 .coverage
 
 # Laravel specific
-toefl-platform/storage/
-toefl-platform/bootstrap/cache/
-toefl-platform/public/hot
-toefl-platform/vite.config.js.timestamp*
-toefl-platform/.vite/
+bootstrap/cache/
+storage/logs/
+public/storage
+.npm
+.yarn
+
+# PHP specific
+*.php~
+.htaccess
 ```

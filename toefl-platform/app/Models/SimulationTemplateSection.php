@@ -19,8 +19,12 @@ class SimulationTemplateSection extends Model
         'question_count',
         'break_after',
         'break_duration',
+        'section_result_id',
     ];
 
+    /**
+     * The attributes that should be cast.
+     */
     protected function casts(): array
     {
         return [
@@ -34,8 +38,43 @@ class SimulationTemplateSection extends Model
         ];
     }
 
+    /**
+     * Get the template this section belongs to
+     */
     public function template(): BelongsTo
     {
         return $this->belongsTo(SimulationTemplate::class, 'template_id');
+    }
+
+    /**
+     * Get the section result for this template section
+     */
+    public function sectionResult(): BelongsTo
+    {
+        return $this->belongsTo(SectionResult::class, 'section_result_id');
+    }
+
+    /**
+     * Scope to get sections ordered by order_index
+     */
+    public function scopeOrdered($query)
+    {
+        return $query->orderBy('order_index');
+    }
+
+    /**
+     * Check if this section has a break after it
+     */
+    public function hasBreak(): bool
+    {
+        return $this->break_after && $this->break_duration > 0;
+    }
+
+    /**
+     * Get the total time including break (if any)
+     */
+    public function getTotalTimeMinutes(): int
+    {
+        return $this->duration_minutes + ($this->break_after ? $this->break_duration : 0);
     }
 }
