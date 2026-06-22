@@ -177,3 +177,129 @@ Route::middleware(['auth'])->prefix('gamification')->name('gamification.')->grou
     // Leaderboard (optional)
     Route::get('/leaderboard', [\App\Http\Controllers\Gamification\GamificationController::class, 'getLeaderboard'])->name('leaderboard');
 });
+
+// Simulation Report Routes
+use App\Http\Controllers\SimulationReportController;
+Route::middleware(['auth'])->group(function () {
+    Route::get('/simulations/{id}/report', [SimulationReportController::class, 'show'])->name('simulations.report.show');
+    Route::get('/simulations/{id}/report/export', [SimulationReportController::class, 'exportPdf'])->name('simulations.report.export');
+    
+    // API Routes for Recommendations
+    Route::post('/api/recommendations/generate-latest', [App\Http\Controllers\RecommendationController::class, 'generateFromLatest'])
+        ->name('api.recommendations.generate-latest');
+    
+    Route::post('/api/recommendations/{id}/read', [App\Http\Controllers\RecommendationController::class, 'markAsRead'])
+        ->name('api.recommendations.mark-read');
+    
+    Route::post('/api/recommendations/mark-all-read', [App\Http\Controllers\RecommendationController::class, 'markAllAsRead'])
+        ->name('api.recommendations.mark-all-read');
+    
+    Route::get('/api/recommendations', [App\Http\Controllers\RecommendationController::class, 'apiGet'])
+        ->name('api.recommendations.get');
+});
+<?php
+
+use App\Http\Controllers\AiTransparencyController;
+use Illuminate\Support\Facades\Route;
+
+/*
+|--------------------------------------------------------------------------
+| AI Transparency Routes (FR-3.5.4)
+|--------------------------------------------------------------------------
+|
+| Routes untuk menampilkan transparansi hasil AI grading dengan
+| highlight inline, tooltip, confidence score, dan statistik.
+|
+*/
+
+// Web routes - Menampilkan halaman transparency
+Route::middleware(['web', 'auth'])->group(function () {
+    // Writing transparency
+    Route::get('/ai-grading/writing/{id}', [AiTransparencyController::class, 'showWriting'])
+        ->name('ai-grading.writing.show');
+    
+    // Speaking transparency
+    Route::get('/ai-grading/speaking/{id}', [AiTransparencyController::class, 'showSpeaking'])
+        ->name('ai-grading.speaking.show');
+});
+
+// API routes - Untuk AJAX/Fetch requests
+Route::middleware(['api', 'auth:api'])->group(function () {
+    // Initialize transparency component
+    Route::post('/ai-transparency/initialize', [AiTransparencyController::class, 'initialize'])
+        ->name('api.ai-transparency.initialize');
+    
+    // Get highlights data
+    Route::get('/ai-grading-results/{id}/highlights', [AiTransparencyController::class, 'getHighlights'])
+        ->name('api.ai-grading-results.highlights');
+});
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\StudentDashboardController;
+
+/*
+|--------------------------------------------------------------------------
+| Web Routes - Student Dashboard (FR-3.6.1)
+|--------------------------------------------------------------------------
+*/
+
+Route::middleware(['auth'])->group(function () {
+    // Dasbor Siswa
+    Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])
+        ->name('student.dashboard');
+
+    // Refresh dashboard cache
+    Route::post('/student/dashboard/refresh', [StudentDashboardController::class, 'refresh'])
+        ->name('student.dashboard.refresh');
+
+    // Placeholder routes untuk quick actions (akan diimplementasikan nanti)
+    Route::get('/practice/start', function() {
+        return redirect()->route('student.dashboard')->with('info', 'Fitur latihan akan segera tersedia.');
+    })->name('practice.start');
+
+    Route::get('/simulation/start', function() {
+        return redirect()->route('student.dashboard')->with('info', 'Fitur simulasi akan segera tersedia.');
+    })->name('simulation.start');
+
+    Route::get('/module/resume/{id}', function($id) {
+        return redirect()->route('student.dashboard')->with('info', 'Fitur modul akan segera tersedia.');
+    })->name('module.resume');
+
+    // Study Plan routes - FR-3.2.4, FR-3.6.3
+    Route::get('/study-plan/create', [App\Http\Controllers\StudyPlanController::class, 'create'])
+        ->name('study-plan.create');
+
+    Route::post('/study-plan', [App\Http\Controllers\StudyPlanController::class, 'store'])
+        ->name('study-plan.store');
+
+    Route::get('/study-plan/{studyPlan}', [App\Http\Controllers\StudyPlanController::class, 'show'])
+        ->name('study-plan.show');
+
+    Route::post('/study-plan/{studyPlan}/regenerate', [App\Http\Controllers\StudyPlanController::class, 'regenerate'])
+        ->name('study-plan.regenerate');
+
+    Route::get('/study-plan/{studyPlan}/calendar', [App\Http\Controllers\StudyPlanController::class, 'calendarData'])
+        ->name('study-plan.calendar');
+
+    Route::post('/study-plan/{studyPlan}/reminder', [App\Http\Controllers\StudyPlanController::class, 'sendReminder'])
+        ->name('study-plan.reminder');
+
+    // Task management
+    Route::post('/study-plan/task/{task}/complete', [App\Http\Controllers\StudyPlanController::class, 'completeTask'])
+        ->name('study-plan.task.complete');
+
+    Route::post('/study-plan/task/{task}/uncomplete', [App\Http\Controllers\StudyPlanController::class, 'uncompleteTask'])
+        ->name('study-plan.task.uncomplete');
+
+    Route::post('/study-plan/task/{task}/adjust', [App\Http\Controllers\StudyPlanController::class, 'adjustTask'])
+        ->name('study-plan.task.adjust');
+
+    // Recommendations routes - FR-3.2.4, FR-3.6.3
+    Route::get('/recommendations', [App\Http\Controllers\RecommendationController::class, 'index'])
+        ->name('recommendations.index');
+
+    Route::get('/badges', function() {
+        return redirect()->route('student.dashboard')->with('info', 'Fitur lencana akan segera tersedia.');
+    })->name('badges.index');
+});
