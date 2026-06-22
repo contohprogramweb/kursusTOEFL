@@ -60,6 +60,10 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/study-plan/task/{task}/adjust', [App\Http\Controllers\StudyPlanController::class, 'adjustTask'])
         ->name('study-plan.task.adjust');
 
+    // Recommendations routes - FR-3.2.4, FR-3.6.3
+    Route::get('/recommendations', [App\Http\Controllers\RecommendationController::class, 'index'])
+        ->name('recommendations.index');
+
     Route::get('/badges', function() {
         return redirect()->route('student.dashboard')->with('info', 'Fitur lencana akan segera tersedia.');
     })->name('badges.index');
