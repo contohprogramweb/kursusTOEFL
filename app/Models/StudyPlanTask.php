@@ -12,6 +12,10 @@ class StudyPlanTask extends Model
         'study_plan_id',
         'title',
         'type',
+        'estimated_minutes',
+        'section',
+        'priority',
+        'metadata',
         'resource_id',
         'is_completed',
         'completed_at',
@@ -21,11 +25,19 @@ class StudyPlanTask extends Model
     protected $casts = [
         'is_completed' => 'boolean',
         'completed_at' => 'datetime',
+        'estimated_minutes' => 'integer',
+        'priority' => 'integer',
+        'metadata' => 'array',
     ];
 
     public function studyPlan(): BelongsTo
     {
         return $this->belongsTo(StudyPlan::class);
+    }
+
+    public function adjustments(): HasMany
+    {
+        return $this->hasMany(StudyPlanAdjustment::class);
     }
 
     /**
@@ -37,6 +49,22 @@ class StudyPlanTask extends Model
     }
 
     /**
+     * Scope to get tasks by section
+     */
+    public function scopeBySection($query, string $section)
+    {
+        return $query->where('section', $section);
+    }
+
+    /**
+     * Scope to order by priority
+     */
+    public function scopeByPriority($query)
+    {
+        return $query->orderBy('priority', 'asc');
+    }
+
+    /**
      * Mark task as completed
      */
     public function markAsCompleted(): void
@@ -45,5 +73,30 @@ class StudyPlanTask extends Model
             'is_completed' => true,
             'completed_at' => now(),
         ]);
+    }
+
+    /**
+     * Get metadata value
+     */
+    public function getMetadataValue(string $key, $default = null)
+    {
+        return $this->metadata[$key] ?? $default;
+    }
+
+    /**
+     * Check if task is overdue
+     */
+    public function isOverdue(): bool
+    {
+        if ($this->is_completed) {
+            return false;
+        }
+
+        $scheduledDate = $this->getMetadataValue('scheduled_date');
+        if (!$scheduledDate) {
+            return false;
+        }
+
+        return now()->isAfter(\carbon\Carbon::parse($scheduledDate)->endOfDay());
     }
 }
