@@ -1,48 +1,34 @@
 ```
-# Laravel-specific ignores
-vendor/
-bootstrap/cache/
-storage/logs/
-storage/framework/
-
 # Dependencies
-node_modules/
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Environment specific settings
-.env
-.env.local
-.env.*
-!.env.example
-
-# Compiled and build artifacts
-*.php~
-*.js.map
-*.css.map
-public/build/
+vendor/
 
 # Logs
 *.log
 storage/logs/*
 
-# Editor/IDE
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
+# Environment
+.env
+.env.local
+.env.*
+
+# Cache
+bootstrap/cache/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Compiled files
+*.php~
 
 # OS generated files
 .DS_Store
 Thumbs.db
 
-# Testing
-.phpunit.result.cache
-coverage/
-.php_cs.cache
+# IDE
+.vscode/
+.idea/
 
-# Legacy Laravel
-.svn
+# Build artifacts
+public/build/
+public/storage
 ```

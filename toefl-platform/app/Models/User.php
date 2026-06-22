@@ -32,6 +32,9 @@ class User extends Authenticatable
         'sso_id',
         'login_attempts',
         'locked_until',
+        'suspension_reason',
+        'suspended_at',
+        'suspended_by',
     ];
 
     /**
@@ -58,6 +61,7 @@ class User extends Authenticatable
             'created_at' => 'datetime',
             'updated_at' => 'datetime',
             'password_hash' => 'hashed',
+            'suspended_at' => 'datetime',
         ];
     }
 
@@ -511,5 +515,94 @@ class User extends Authenticatable
     public function scopeAdmins($query)
     {
         return $query->whereIn('role', [self::ROLE_ADMIN, self::ROLE_SUPER_ADMIN]);
+    }
+
+    /**
+     * Scope untuk user yang suspended
+     */
+    public function scopeSuspended($query)
+    {
+        return $query->where('status', self::STATUS_SUSPENDED);
+    }
+
+    /**
+     * Scope untuk search by name or email
+     */
+    public function scopeSearch($query, string $search)
+    {
+        return $query->where(function ($q) use ($search) {
+            $q->where('full_name', 'like', "%{$search}%")
+              ->orWhere('email', 'like', "%{$search}%");
+        });
+    }
+
+    /**
+     * Scope untuk filter by date range
+     */
+    public function scopeDateRange($query, ?string $startDate, ?string $endDate)
+    {
+        if ($startDate) {
+            $query->whereDate('created_at', '>=', $startDate);
+        }
+        if ($endDate) {
+            $query->whereDate('created_at', '<=', $endDate);
+        }
+        return $query;
+    }
+
+    /**
+     * Relationship: Admin who suspended this user
+     */
+    public function suspendedByUser()
+    {
+        return $this->belongsTo(User::class, 'suspended_by');
+    }
+
+    /**
+     * Relationship: Audit logs for this user
+     */
+    public function userAuditLogs()
+    {
+        return $this->hasMany(UserAuditLog::class, 'user_id');
+    }
+
+    /**
+     * Relationship: Audit logs performed by this user (as admin)
+     */
+    public function performedAuditLogs()
+    {
+        return $this->hasMany(UserAuditLog::class, 'admin_id');
+    }
+
+    /**
+     * Check if user is suspended
+     */
+    public function isSuspended(): bool
+    {
+        return $this->status === self::STATUS_SUSPENDED;
+    }
+
+    /**
+     * Suspend user with reason
+     */
+    public function suspend(string $reason, User $admin): void
+    {
+        $this->status = self::STATUS_SUSPENDED;
+        $this->suspension_reason = $reason;
+        $this->suspended_at = now();
+        $this->suspended_by = $admin->id;
+        $this->save();
+    }
+
+    /**
+     * Unsuspend user
+     */
+    public function unsuspend(): void
+    {
+        $this->status = self::STATUS_ACTIVE;
+        $this->suspension_reason = null;
+        $this->suspended_at = null;
+        $this->suspended_by = null;
+        $this->save();
     }
 }
