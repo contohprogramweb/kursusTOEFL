@@ -160,3 +160,20 @@ Route::middleware(['auth'])->prefix('simulations')->name('simulations.')->group(
     Route::get('/{simulation}/results', [App\Http\Controllers\SimulationController::class, 'showResults'])->name('results.show');
     Route::get('/{simulation}/results/{section}', [App\Http\Controllers\SimulationController::class, 'showSectionResults'])->name('results.section');
 });
+
+// Gamification Routes
+Route::middleware(['auth'])->prefix('gamification')->name('gamification.')->group(function () {
+    // Dashboard/Stats
+    Route::get('/stats', [\App\Http\Controllers\Gamification\GamificationController::class, 'getStats'])->name('stats');
+    
+    // Badges
+    Route::get('/badges', [\App\Http\Controllers\Gamification\GamificationController::class, 'getBadges'])->name('badges.index');
+    Route::get('/badges/all', [\App\Http\Controllers\Gamification\GamificationController::class, 'getAllBadges'])->name('badges.all');
+    Route::patch('/badges/{badge}/visibility', [\App\Http\Controllers\Gamification\GamificationController::class, 'toggleBadgeVisibility'])->name('badges.visibility');
+    
+    // Streak Freeze
+    Route::post('/streak/freeze', [\App\Http\Controllers\Gamification\GamificationController::class, 'useFreeze'])->name('streak.freeze');
+    
+    // Leaderboard (optional)
+    Route::get('/leaderboard', [\App\Http\Controllers\Gamification\GamificationController::class, 'getLeaderboard'])->name('leaderboard');
+});
