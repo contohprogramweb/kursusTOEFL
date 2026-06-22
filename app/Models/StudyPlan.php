@@ -12,6 +12,12 @@ class StudyPlan extends Model
     protected $fillable = [
         'user_id',
         'name',
+        'target_score',
+        'test_date',
+        'daily_hours',
+        'available_days',
+        'ai_notes',
+        'is_ai_generated',
         'start_date',
         'end_date',
         'total_tasks',
@@ -22,7 +28,11 @@ class StudyPlan extends Model
     protected $casts = [
         'start_date' => 'date',
         'end_date' => 'date',
+        'test_date' => 'date',
+        'daily_hours' => 'decimal:1',
+        'available_days' => 'array',
         'is_completed' => 'boolean',
+        'is_ai_generated' => 'boolean',
     ];
 
     public function user(): BelongsTo
@@ -33,6 +43,11 @@ class StudyPlan extends Model
     public function tasks(): HasMany
     {
         return $this->hasMany(StudyPlanTask::class)->orderBy('order');
+    }
+
+    public function adjustments(): HasMany
+    {
+        return $this->hasMany(StudyPlanAdjustment::class);
     }
 
     /**
@@ -55,9 +70,19 @@ class StudyPlan extends Model
     }
 
     /**
-     * Calculate days remaining until end date
+     * Calculate days remaining until test date
      */
     public function getDaysRemainingAttribute(): int
+    {
+        $targetDate = $this->test_date ?? $this->end_date;
+        $diff = now()->startOfDay()->diffInDays($targetDate->startOfDay(), false);
+        return max(0, $diff);
+    }
+
+    /**
+     * Calculate days remaining until end date (original behavior)
+     */
+    public function getDaysUntilEndDateAttribute(): int
     {
         $diff = now()->startOfDay()->diffInDays($this->end_date->startOfDay(), false);
         return max(0, $diff);
@@ -78,5 +103,30 @@ class StudyPlan extends Model
     {
         return $query->where('status', 'active')
                     ->where('end_date', '>=', now());
+    }
+
+    /**
+     * Get available days as array
+     */
+    public function getAvailableDaysArrayAttribute(): array
+    {
+        return $this->available_days ?? [1, 2, 3, 4, 5]; // Default: Mon-Fri
+    }
+
+    /**
+     * Check if a specific day of week is available (0=Sunday, 6=Saturday)
+     */
+    public function isDayAvailable(int $dayOfWeek): bool
+    {
+        $availableDays = $this->available_days ?? [1, 2, 3, 4, 5];
+        return in_array($dayOfWeek, $availableDays);
+    }
+
+    /**
+     * Calculate total estimated minutes for all tasks
+     */
+    public function getTotalEstimatedMinutesAttribute(): int
+    {
+        return $this->tasks()->sum('estimated_minutes');
     }
 }
