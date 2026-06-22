@@ -1,26 +1,40 @@
 ```
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
+
 # Dependencies
 vendor/
 node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 
-# Build and cache directories
-bootstrap/cache/
-storage/framework/cache/
-storage/framework/sessions/
-storage/framework/views/
-composer.lock
+# Build directories
+build/
+dist/
+target/
 
-# Environment specific files
+# Logs and temp files
+*.log
+*.tmp
+*.swp
+*.swo
+
+# Environment
 .env
 .env.local
 .env.*
-!.env.example
 
-# Logs
-*.log
-storage/logs/*
-
-# IDE files
+# Editors
 .vscode/
 .idea/
 *.swp
@@ -28,22 +42,34 @@ storage/logs/*
 
 # OS generated files
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
 
-# Compiled and temporary files
-*.php~
-*.tmp
-*.bak
+# Laravel specific
+bootstrap/cache/
+storage/framework/cache/
+storage/logs/
+public/storage/
 
-# Database migration backups (if any)
-db_temp/
-resources_temp/
+# PHP specific
+*.php~
+.php_cs.cache
+.phpunit.result.cache
 
 # Coverage reports
 coverage/
-*.gcov
-*.lcov
+htmlcov/
+.coverage
 
-# Testing
-.phpunit.result.cache
+# Package lock files
+composer.lock
+package-lock.json
+yarn.lock
+
+# IDE
+.nyc_output/
 ```
