@@ -35,4 +35,24 @@ return [
         ],
     ],
 
+    // Google Cloud Speech-to-Text API
+    'google_cloud' => [
+        'api_key' => env('GOOGLE_CLOUD_API_KEY'),
+        'project_id' => env('GOOGLE_CLOUD_PROJECT_ID'),
+    ],
+
+    // OpenAI API for AI Grading
+    'openai' => [
+        'api_key' => env('OPENAI_API_KEY'),
+        'model' => env('OPENAI_MODEL', 'gpt-4'),
+        'max_tokens' => env('OPENAI_MAX_TOKENS', 2500),
+    ],
+
+    // Anthropic Claude API (alternative to OpenAI)
+    'claude' => [
+        'api_key' => env('CLAUDE_API_KEY'),
+        'model' => env('CLAUDE_MODEL', 'claude-3-opus-20240229'),
+        'max_tokens' => env('CLAUDE_MAX_TOKENS', 4096),
+    ],
+
 ];
