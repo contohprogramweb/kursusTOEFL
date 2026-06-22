@@ -6,18 +6,24 @@ __pycache__/
 *.obj
 dist/
 build/
-target/
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
 
 # Dependencies
+.venv/
+venv/
 node_modules/
 vendor/
-*.egg-info/
-.Python
-venv/
-.venv/
-.env
-.env.local
-.env.*
+composer.lock
+.mypy_cache/
+.pytest_cache/
+.coverage
+coverage/
+htmlcov/
 
 # Logs and temp files
 *.log
@@ -25,24 +31,22 @@ venv/
 *.swp
 *.swo
 
+# Environment
+.env
+.env.local
+.env.*
+
 # Editors
 .vscode/
 .idea/
 *.swp
 *.swo
 
-# OS generated files
+# System files
 .DS_Store
 Thumbs.db
 
-# Coverage reports
-coverage/
-htmlcov/
-.coverage
-
-# Laravel specific
-/storage/logs/*
-/public/storage
-/bootstrap/cache/*
-!.gitkeep
+# Build systems
+target/
+.gradle/
 ```
