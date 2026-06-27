@@ -1,62 +1,42 @@
-# Laravel-specific ignores
-vendor/
-bootstrap/cache/
-storage/logs/
-storage/framework/
-public/storage/
-
+```
 # Dependencies
+vendor/
 node_modules/
 
-# Environment
+# Build and compiled files
+public/build/
+public/css/*.css.map
+public/js/*.js.map
+*.min.css
+*.min.js
+
+# Environment variables
 .env
 .env.local
 .env.*
 
-# Compiled and build artifacts
-*.pyc
-__pycache__/
-*.o
-*.obj
-*.exe
-*.dll
-*.so
-*.a
-*.out
-
-# Logs and temp files
+# Logs
 *.log
-*.tmp
+storage/logs/*
+
+# Cache
+bootstrap/cache/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# User-specific files
+.vscode/
+.idea/
 *.swp
 *.swo
 
-# Editors
-.vscode/
-.idea/
-
-# OS
+# OS generated files
 .DS_Store
 Thumbs.db
 
-# Testing and coverage
-.coverage
-coverage/
-htmlcov/
-
-# Package managers
-npm-debug.log*
-yarn-debug.log*
-yarn-error.log*
-
-# Laravel specific
-*.key
-.env.backup
+# Testing
 .phpunit.result.cache
-
-# Build outputs
-dist/
-build/
-target/
-.gradle/
-.mypy_cache/
-.pytest_cache/
+.phpspec/
+coverage/
+```
