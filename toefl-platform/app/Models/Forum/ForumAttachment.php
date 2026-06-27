@@ -2,10 +2,9 @@
 
 namespace App\Models\Forum;
 
-use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class ForumAttachment extends Model
 {
@@ -15,16 +14,15 @@ class ForumAttachment extends Model
     const RESIZE_WIDTH = 800;
 
     protected $fillable = [
-        'thread_id',
-        'reply_id',
-        'user_id',
+        'attachable_id',
+        'attachable_type',
         'file_name',
         'original_name',
         'mime_type',
         'file_size',
         'width',
         'height',
-        'path',
+        'storage_path',
     ];
 
     protected $casts = [
@@ -34,27 +32,11 @@ class ForumAttachment extends Model
     ];
 
     /**
-     * Get the thread that owns the attachment.
+     * Get the parent attachable model.
      */
-    public function thread(): BelongsTo
+    public function attachable(): MorphTo
     {
-        return $this->belongsTo(ForumThread::class);
-    }
-
-    /**
-     * Get the reply that owns the attachment.
-     */
-    public function reply(): BelongsTo
-    {
-        return $this->belongsTo(ForumReply::class);
-    }
-
-    /**
-     * Get the user who uploaded the attachment.
-     */
-    public function uploader(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->morphTo();
     }
 
     /**
@@ -62,7 +44,7 @@ class ForumAttachment extends Model
      */
     public function getUrlAttribute(): string
     {
-        return asset('storage/' . $this->path);
+        return storage_url($this->storage_path);
     }
 
     /**

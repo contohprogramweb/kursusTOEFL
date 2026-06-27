@@ -22,14 +22,14 @@ class NotificationRateLimit extends Model
 
     protected $fillable = [
         'user_id',
-        'channel',
-        'date',
+        'limit_type',
         'count',
+        'reset_date',
     ];
 
     protected $casts = [
         'count' => 'integer',
-        'date' => 'date',
+        'reset_date' => 'date',
     ];
 
     /**
@@ -43,15 +43,14 @@ class NotificationRateLimit extends Model
     /**
      * Check if rate limit allows sending.
      */
-    public static function canSend(int $userId, string $channel): bool
+    public static function canSend(int $userId, string $limitType): bool
     {
         $today = Carbon::today();
-        $limitKey = $channel . '_daily';
-        $maxLimit = self::LIMITS[$limitKey] ?? 100;
+        $maxLimit = self::LIMITS[$limitType] ?? 100;
 
         $rateLimit = self::where('user_id', $userId)
-            ->where('channel', $channel)
-            ->where('date', $today)
+            ->where('limit_type', $limitType)
+            ->where('reset_date', $today)
             ->first();
 
         if (!$rateLimit) {
@@ -64,15 +63,14 @@ class NotificationRateLimit extends Model
     /**
      * Increment the rate limit counter.
      */
-    public static function increment(int $userId, string $channel): void
+    public static function increment(int $userId, string $limitType): void
     {
         $today = Carbon::today();
-        $limitKey = $channel . '_daily';
-        $maxLimit = self::LIMITS[$limitKey] ?? 100;
+        $maxLimit = self::LIMITS[$limitType] ?? 100;
 
         $rateLimit = self::where('user_id', $userId)
-            ->where('channel', $channel)
-            ->where('date', $today)
+            ->where('limit_type', $limitType)
+            ->where('reset_date', $today)
             ->first();
 
         if ($rateLimit) {
@@ -82,36 +80,35 @@ class NotificationRateLimit extends Model
         } else {
             self::create([
                 'user_id' => $userId,
-                'channel' => $channel,
+                'limit_type' => $limitType,
                 'count' => 1,
-                'date' => $today,
+                'reset_date' => $today,
             ]);
         }
     }
 
     /**
-     * Get current count for a channel.
+     * Get current count for a limit type.
      */
-    public static function getCount(int $userId, string $channel): int
+    public static function getCount(int $userId, string $limitType): int
     {
         $today = Carbon::today();
 
         $rateLimit = self::where('user_id', $userId)
-            ->where('channel', $channel)
-            ->where('date', $today)
+            ->where('limit_type', $limitType)
+            ->where('reset_date', $today)
             ->first();
 
         return $rateLimit ? $rateLimit->count : 0;
     }
 
     /**
-     * Get remaining count for a channel.
+     * Get remaining count for a limit type.
      */
-    public static function getRemaining(int $userId, string $channel): int
+    public static function getRemaining(int $userId, string $limitType): int
     {
-        $limitKey = $channel . '_daily';
-        $maxLimit = self::LIMITS[$limitKey] ?? 100;
-        $currentCount = self::getCount($userId, $channel);
+        $maxLimit = self::LIMITS[$limitType] ?? 100;
+        $currentCount = self::getCount($userId, $limitType);
 
         return max(0, $maxLimit - $currentCount);
     }
@@ -119,12 +116,12 @@ class NotificationRateLimit extends Model
     /**
      * Reset rate limits for a user.
      */
-    public static function resetForUser(int $userId, ?string $channel = null): void
+    public static function resetForUser(int $userId, ?string $limitType = null): void
     {
         $query = self::where('user_id', $userId);
 
-        if ($channel) {
-            $query->where('channel', $channel);
+        if ($limitType) {
+            $query->where('limit_type', $limitType);
         }
 
         $query->delete();
@@ -135,6 +132,6 @@ class NotificationRateLimit extends Model
      */
     public static function cleanupOldRecords(): void
     {
-        self::where('date', '<', Carbon::today()->subDays(7))->delete();
+        self::where('reset_date', '<', Carbon::today()->subDays(7))->delete();
     }
 }

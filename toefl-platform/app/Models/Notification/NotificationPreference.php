@@ -14,19 +14,20 @@ class NotificationPreference extends Model
     protected $fillable = [
         'user_id',
         'category',
-        'in_app',
-        'email',
-        'push',
-        'sms',
-        'whatsapp',
+        'event_type',
+        'channel_in_app',
+        'channel_email',
+        'channel_push',
+        'channel_sms',
+        'channel_whatsapp',
     ];
 
     protected $casts = [
-        'in_app' => 'boolean',
-        'email' => 'boolean',
-        'push' => 'boolean',
-        'sms' => 'boolean',
-        'whatsapp' => 'boolean',
+        'channel_in_app' => 'boolean',
+        'channel_email' => 'boolean',
+        'channel_push' => 'boolean',
+        'channel_sms' => 'boolean',
+        'channel_whatsapp' => 'boolean',
     ];
 
     /**
@@ -44,24 +45,24 @@ class NotificationPreference extends Model
     {
         $channels = [];
 
-        if ($this->in_app) {
+        if ($this->channel_in_app) {
             $channels[] = 'database';
         }
 
-        if ($this->email) {
+        if ($this->channel_email) {
             $channels[] = 'mail';
         }
 
-        if ($this->push) {
-            $channels[] = \App\Channels\FcmChannel::class;
+        if ($this->channel_push) {
+            $channels[] = 'fcm';
         }
 
-        if ($this->sms) {
-            $channels[] = \App\Channels\SmsChannel::class;
+        if ($this->channel_sms) {
+            $channels[] = 'sms';
         }
 
-        if ($this->whatsapp) {
-            $channels[] = \App\Channels\WhatsAppChannel::class;
+        if ($this->channel_whatsapp) {
+            $channels[] = 'whatsapp';
         }
 
         return $channels;
@@ -78,19 +79,20 @@ class NotificationPreference extends Model
     /**
      * Get or create preference for user.
      */
-    public static function getOrCreate(int $userId, string $category, string $eventType = null): self
+    public static function getOrCreate(int $userId, string $category, string $eventType): self
     {
         return self::firstOrCreate(
             [
                 'user_id' => $userId,
                 'category' => $category,
+                'event_type' => $eventType,
             ],
             [
-                'in_app' => true,
-                'email' => true,
-                'push' => true,
-                'sms' => false,
-                'whatsapp' => false,
+                'channel_in_app' => true,
+                'channel_email' => true,
+                'channel_push' => true,
+                'channel_sms' => false,
+                'channel_whatsapp' => false,
             ]
         );
     }
