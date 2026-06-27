@@ -197,3 +197,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/api/recommendations', [App\Http\Controllers\RecommendationController::class, 'apiGet'])
         ->name('api.recommendations.get');
 });
+
+// Include additional route files
+require __DIR__.'/admin.php';
+require __DIR__.'/student-dashboard.php';
+require __DIR__.'/ai-transparency.php';

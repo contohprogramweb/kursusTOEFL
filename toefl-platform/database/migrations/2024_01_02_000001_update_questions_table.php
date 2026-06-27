@@ -20,7 +20,7 @@ return new class extends Migration
             $table->tinyInteger('difficulty')->unsigned()->default(3)->change();
             
             // Add full-text search indexes for MySQL
-            $table->fullText(['question_text', 'passage_text']);
+            if (config('database.default') !== 'sqlite') { $table->fullText(['question_text', 'passage_text']); }
         });
 
         // Update micro_skills table if needed
