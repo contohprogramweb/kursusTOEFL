@@ -24,9 +24,7 @@ return new class extends Migration
         });
 
         // Update micro_skills table if needed
-        Schema::table('micro_skills', function (Blueprint $table) {
-            $table->index('section');
-        });
+        // Index already exists in create_core_tables migration, so we skip it
 
         // Ensure question_skills has proper constraints for min 1, max 3 tags
         // This will be enforced at application level
