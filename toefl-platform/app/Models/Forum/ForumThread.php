@@ -16,14 +16,14 @@ class ForumThread extends Model
 
     protected $fillable = [
         'category_id',
-        'user_id',
+        'author_id',
         'title',
         'content',
         'is_pinned',
         'is_locked',
         'is_hidden',
         'hidden_reason',
-        'hidden_by',
+        'hidden_by_id',
         'hidden_at',
         'view_count',
         'reply_count',
@@ -56,7 +56,7 @@ class ForumThread extends Model
      */
     public function author(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'author_id');
     }
 
     /**
@@ -64,7 +64,7 @@ class ForumThread extends Model
      */
     public function hiddenBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'hidden_by');
+        return $this->belongsTo(User::class, 'hidden_by_id');
     }
 
     /**

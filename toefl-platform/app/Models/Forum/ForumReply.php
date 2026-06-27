@@ -17,13 +17,13 @@ class ForumReply extends Model
 
     protected $fillable = [
         'thread_id',
-        'user_id',
+        'author_id',
         'parent_id',
         'nesting_level',
         'content',
         'is_hidden',
         'hidden_reason',
-        'hidden_by',
+        'hidden_by_id',
         'hidden_at',
         'is_flagged',
         'flag_reason',
@@ -51,7 +51,7 @@ class ForumReply extends Model
      */
     public function author(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'author_id');
     }
 
     /**
@@ -75,7 +75,7 @@ class ForumReply extends Model
      */
     public function hiddenBy(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'hidden_by');
+        return $this->belongsTo(User::class, 'hidden_by_id');
     }
 
     /**
@@ -108,7 +108,7 @@ class ForumReply extends Model
     public static function detectSpam(int $userId, string $content, int $timeWindowMinutes = 60): bool
     {
         // Check for duplicate content from same user in time window
-        $duplicateCount = self::where('user_id', $userId)
+        $duplicateCount = self::where('author_id', $userId)
             ->where('content', $content)
             ->where('created_at', '>=', now()->subMinutes($timeWindowMinutes))
             ->count();
@@ -130,7 +130,7 @@ class ForumReply extends Model
      */
     public function autoFlagIfSpam(): bool
     {
-        if (self::detectSpam($this->user_id, $this->content)) {
+        if (self::detectSpam($this->author_id, $this->content)) {
             $this->update([
                 'is_flagged' => true,
                 'flag_reason' => 'Suspected spam: repetitive content or suspicious links',
