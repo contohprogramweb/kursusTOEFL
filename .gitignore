@@ -1,29 +1,71 @@
-```
-# Backup files
-*.backup
+# Compiled and build artifacts
+*.pyc
+__pycache__/
+*.o
+*.obj
+*.class
+*.exe
+*.dll
+*.so
+*.a
+*.out
 
-# Laravel/Lumen specific
-vendor/
+# Dependencies
+node_modules/
+venv/
+.venv/
 .env
 .env.local
 .env.*
-composer.lock
 
-# PHP
-*.php~
+# Logs and temp files
+*.log
+*.tmp
 *.swp
 
-# Logs
-*.log
-
-# Temp files
-*.tmp
-
-# IDE
+# Editors
 .vscode/
 .idea/
+*.swp
+*.swo
 
-# OS
+# System files
 .DS_Store
 Thumbs.db
-```
+
+# Coverage
+coverage/
+htmlcov/
+.coverage
+
+# Build directories (common for Laravel/PHP projects)
+vendor/
+composer.lock
+public/storage
+bootstrap/cache/
+storage/logs/
+storage/framework/
+
+# Compression files
+*.zip
+*.gz
+*.tar
+*.tgz
+*.bz2
+*.xz
+*.7z
+*.rar
+*.zst
+*.lz4
+*.lzh
+*.cab
+*.arj
+*.rpm
+*.deb
+*.Z
+*.lz
+*.lzo
+*.tar.gz
+*.tar.bz2
+*.tar.xz
+*.tar.zst
