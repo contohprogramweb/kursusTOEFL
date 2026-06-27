@@ -1,1 +1,29 @@
-Nothing needs to be added to .gitignore since only a PHP route file was modified and no build artifacts, dependencies, or temporary files were included in the changes.
+```
+# Backup files
+*.backup
+
+# Laravel/Lumen specific
+vendor/
+.env
+.env.local
+.env.*
+composer.lock
+
+# PHP
+*.php~
+*.swp
+
+# Logs
+*.log
+
+# Temp files
+*.tmp
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+```
